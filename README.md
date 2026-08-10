@@ -98,15 +98,6 @@ focus-lock/
 ├── package.json           # Jest dev dependency + `npm test` script
 └── icons/                 # Extension icons
 ```
-
-## Roadmap / ideas for extending this further
-
-- [ ] Sync settings across devices with `chrome.storage.sync` instead of `local`
-- [ ] Custom block-page messages or motivational quotes per site
-- [ ] Monthly/longer-range history view, not just 7 days
-- [ ] Firefox port (the WebExtensions API used here is largely compatible)
-- [ ] Publish to the Chrome Web Store
-
 ## License
 
 MIT
