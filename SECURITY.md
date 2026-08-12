@@ -1,5 +1,6 @@
 # Security
 
+
 Focus Lock is a small, single-user, fully local Chrome extension. This document explains what data it touches, what permissions it needs and why, and what's been done to keep it safe to run.
 
 ## Data handling
