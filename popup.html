@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Focus Lock</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="bar">
+    <div class="mark">◐</div>
+    <div class="bar-text">
+      <h1>Focus Lock</h1>
+      <p id="today-label" class="sub"></p>
+    </div>
+    <button id="settings-btn" class="icon-btn" title="Manage sites">⚙</button>
+  </header>
+
+  <section id="stats-panel" class="stats-panel hidden" aria-label="Overall stats">
+    <div class="stat">
+      <div class="stat-value" id="stat-saved">—</div>
+      <div class="stat-label">min saved</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-streak">—</div>
+      <div class="stat-label" id="stat-streak-label">day streak</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-best-day">—</div>
+      <div class="stat-label">best day this week</div>
+    </div>
+  </section>
+
+  <section id="badge-section" class="badge-section hidden" aria-label="Streak badges">
+    <div class="badge-row" id="badge-row"></div>
+  </section>
+
+  <section id="site-list" class="sites"></section>
+
+  <div id="empty-state" class="empty hidden">
+    <p class="empty-title">No sites tracked yet</p>
+    <p class="empty-hint">Add a site with a daily time budget to start seeing your stats here.</p>
+  </div>
+
+  <button id="open-options" class="manage-btn">Manage tracked sites</button>
+
+  <script src="lib.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
