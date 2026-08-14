@@ -1,0 +1,12 @@
+{
+  "name": "focus-lock",
+  "version": "2.1.0",
+  "description": "Focus Lock — Chrome extension. Test suite for pure logic in lib.js.",
+  "private": true,
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
