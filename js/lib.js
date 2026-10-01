@@ -1,8 +1,8 @@
 // ---- Focus Lock: shared pure-function library ----
 // No chrome.* calls in this file on purpose — everything here is plain
 // JS so it can be unit-tested with Jest (see tests/lib.test.js) and
-// reused unchanged by background.js (service worker, via importScripts),
-// popup.js, and options.js (via a <script> tag).
+// reused unchanged by js/background.js (service worker, via importScripts),
+// js/popup.js, and js/options.js (via a <script> tag).
 
 (function (root, factory) {
   if (typeof module === "object" && module.exports) {
@@ -133,21 +133,12 @@
 
   // ---------- path-level include/exclude rules ----------
 
-  // A pattern is either:
-  //  - a wildcard, e.g. "watch?v=abc123*"  (* matches anything, everything else literal)
-  //  - a regex, wrapped in slashes, e.g. "/^\/r\/(programming|science)/i"
-  // Matched against `pathname + search` of the URL (no protocol/host).
   const MAX_PATTERN_LENGTH = 300;
 
   function matchesPattern(pattern, str) {
     const p = String(pattern).trim();
     if (!p || p.length > MAX_PATTERN_LENGTH) return false;
     try {
-      // Only treat as a /regex/flags literal if it starts with "/", has a
-      // later "/" closing it, and whatever follows that closing slash is
-      // nothing but valid regex flags. This keeps ordinary path wildcards
-      // like "/r/all*" (which also start with "/") from being misread as
-      // regex syntax.
       if (p.startsWith("/") && p.length > 1) {
         const lastSlash = p.lastIndexOf("/");
         const possibleFlags = p.slice(lastSlash + 1);
@@ -164,9 +155,6 @@
     }
   }
 
-  // Given a site config and a full page URL, decide whether this specific
-  // path should be tracked/blockable at all. Exclude patterns win over
-  // include patterns. No rules configured => always trackable (whole domain).
   function pathAllowsTracking(site, url) {
     const rules = site.pathRules;
     if (!rules) return true;
@@ -189,17 +177,12 @@
 
   // ---------- streaks & badges ----------
 
-  // Milestones shown to the user as unlockable badges, in ascending order.
-  // `days` is the length of a consecutive under-budget streak required.
   const BADGE_DEFS = [
     { id: "week", days: 7, name: "Week Streak", icon: "🔥" },
     { id: "fortnight", days: 14, name: "Two-Week Streak", icon: "⚡" },
     { id: "month", days: 30, name: "Month Master", icon: "🏆" },
   ];
 
-  // A day counts as "under budget" if none of the currently-configured sites
-  // went over its limit that day. Days with zero tracked sites don't count
-  // either way (returns null) — there's nothing to judge yet.
   function dayIsUnderBudget(day, sites, usage) {
     const dayUsage = (usage && usage[day]) || {};
     const domains = Object.keys(sites || {});
@@ -211,10 +194,6 @@
     });
   }
 
-  // Consecutive under-budget days counting back from `now`, inclusive of
-  // today-so-far. Days with no verdict (null) are skipped without breaking
-  // the streak; the walk stops at the first day that *was* over budget.
-  // Capped to avoid an unbounded loop if history is somehow huge.
   function computeStreak(sites, usage, now = new Date(), maxLookback = 400) {
     let streak = 0;
     for (let i = 0; i < maxLookback; i++) {
@@ -227,16 +206,10 @@
     return streak;
   }
 
-  // Given a streak length, which badge ids does it qualify for?
   function badgeIdsForStreak(streak) {
     return BADGE_DEFS.filter((b) => streak >= b.days).map((b) => b.id);
   }
 
-  // Folds newly-qualified badges into a persisted `{ [badgeId]: isoDateEarned }`
-  // record. Once earned, a badge stays recorded even if the streak later
-  // resets — badges mark an achievement reached, not a current state.
-  // Returns { earnedBadges, newlyEarned } where newlyEarned lists badge defs
-  // unlocked by *this* call (empty if nothing new).
   function mergeEarnedBadges(existingEarned, streak, now = new Date()) {
     const earnedBadges = { ...(existingEarned || {}) };
     const newlyEarned = [];
@@ -249,12 +222,40 @@
     return { earnedBadges, newlyEarned };
   }
 
-  // ---------- limit logic ----------
+  // ---------- limit & pause logic ----------
 
-  // Pure version: caller resolves usedSeconds/limitMinutes/snoozed from storage.
   function limitExceeded(usedSeconds, limitMinutes, snoozed = false) {
     if (snoozed) return false;
     return usedSeconds >= limitMinutes * 60;
+  }
+
+  function isGlobalPaused(pausedUntil) {
+    return typeof pausedUntil === "number" && Date.now() < pausedUntil;
+  }
+
+  // ---------- motivational focus quotes ----------
+
+  const FOCUS_QUOTES = [
+    { quote: "Focus is a muscle. Every time you turn away from distraction, you build it stronger.", author: "Focus Lock" },
+    { quote: "Action produces motivation, not the other way around. Step away and start create.", author: "Productivity Principles" },
+    { quote: "It’s not that I’m so smart, it’s just that I stay with problems longer.", author: "Albert Einstein" },
+    { quote: "Concentrate all your thoughts upon the work in hand. The sun's rays do not burn until brought to a focus.", author: "Alexander Graham Bell" },
+    { quote: "You will never reach your destination if you stop and throw stones at every dog that barks.", author: "Winston Churchill" },
+    { quote: "Starve your distractions, feed your focus.", author: "Anonymous" },
+  ];
+
+  function getRandomQuote(seedStr) {
+    let hash = 0;
+    if (seedStr) {
+      for (let i = 0; i < seedStr.length; i++) {
+        hash = (hash << 5) - hash + seedStr.charCodeAt(i);
+        hash |= 0;
+      }
+    } else {
+      hash = Math.floor(Math.random() * 100);
+    }
+    const idx = Math.abs(hash) % FOCUS_QUOTES.length;
+    return FOCUS_QUOTES[idx];
   }
 
   // ---------- formatting ----------
@@ -268,23 +269,14 @@
 
   // ---------- safety limits & validation ----------
 
-  const MAX_DOMAIN_LENGTH = 253; // max valid DNS hostname length
-  const MAX_LIMIT_MINUTES = 1440; // can't set a daily budget over 24h
+  const MAX_DOMAIN_LENGTH = 253;
+  const MAX_LIMIT_MINUTES = 1440;
   const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
-  // Rejects keys that would let an imported/settings object tamper with an
-  // object's prototype chain when spread/assigned (e.g. `obj["__proto__"] = x`).
-  // Belt-and-suspenders: domain values are also validated by shape (below),
-  // which already excludes these, but this guard is applied anywhere an
-  // externally-supplied string is used as an object key.
   function isUnsafeKey(key) {
     return UNSAFE_KEYS.has(String(key).toLowerCase());
   }
 
-  // A conservative hostname check: labels of letters/digits/hyphens
-  // separated by dots, ending in a 2+ letter TLD-like label. Deliberately
-  // strict — this is a domain *key* used to match tabs, not a full RFC 1035
-  // validator, so anything ambiguous is rejected rather than guessed at.
   function isValidDomain(domain) {
     const d = String(domain);
     if (!d || d.length > MAX_DOMAIN_LENGTH) return false;
@@ -300,12 +292,6 @@
 
   // ---------- output safety ----------
 
-  // Escapes a string for safe interpolation into innerHTML, whether it ends
-  // up as text content or inside a double-quoted attribute. Domain names are
-  // user-typed, so even though the only "attacker" is the same user, this
-  // closes an easy self-XSS vector (e.g. a domain field containing
-  // `"><img src=x onerror=...>`) and is just correct practice for any
-  // untrusted string reaching innerHTML.
   function escapeHTML(str) {
     return String(str)
       .replace(/&/g, "&amp;")
@@ -320,6 +306,7 @@
     DEFAULT_PATH_RULES,
     MAX_DOMAIN_LENGTH,
     MAX_LIMIT_MINUTES,
+    FOCUS_QUOTES,
     dateKey,
     todayKey,
     lastNDays,
@@ -335,6 +322,8 @@
     matchesPattern,
     pathAllowsTracking,
     limitExceeded,
+    isGlobalPaused,
+    getRandomQuote,
     formatMinSec,
     escapeHTML,
     BADGE_DEFS,

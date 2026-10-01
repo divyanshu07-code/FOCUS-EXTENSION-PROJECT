@@ -6,6 +6,14 @@ const tabId = params.get("tabId");
 
 document.getElementById("site-name").textContent = domain;
 document.getElementById("limit-min").textContent = limit;
+
+// Set random inspirational focus quote
+if (window.FocusLockLib && FocusLockLib.getRandomQuote) {
+  const quote = FocusLockLib.getRandomQuote(domain);
+  document.getElementById("quote-text").textContent = `"${quote.quote}"`;
+  document.getElementById("quote-author").textContent = `— ${quote.author}`;
+}
+
 document.getElementById("back-btn").addEventListener("click", () => history.back());
 
 const snoozeBtn = document.getElementById("snooze-btn");
@@ -42,7 +50,6 @@ snoozeBtn.addEventListener("click", () => {
         return;
       }
       note.textContent = `Granted ${res.minutes} minutes. ${res.remaining} snooze(s) left today.`;
-      // navigation back to returnUrl is handled by background.js
     }
   );
 });

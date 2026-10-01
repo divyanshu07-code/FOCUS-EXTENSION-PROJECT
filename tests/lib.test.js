@@ -19,7 +19,9 @@ const {
   computeStreak,
   badgeIdsForStreak,
   mergeEarnedBadges,
-} = require("../lib.js");
+  isGlobalPaused,
+  getRandomQuote,
+} = require("../js/lib.js");
 
 describe("dateKey", () => {
   test("formats a date as YYYY-MM-DD, zero-padded", () => {
@@ -395,3 +397,24 @@ describe("mergeEarnedBadges", () => {
     expect(Object.keys(earnedBadges).sort()).toEqual(["fortnight", "month", "week"]);
   });
 });
+
+describe("isGlobalPaused", () => {
+  test("returns false when pause is null or in the past", () => {
+    expect(isGlobalPaused(null)).toBe(false);
+    expect(isGlobalPaused(Date.now() - 1000)).toBe(false);
+  });
+
+  test("returns true when pause timestamp is in the future", () => {
+    expect(isGlobalPaused(Date.now() + 60000)).toBe(true);
+  });
+});
+
+describe("getRandomQuote", () => {
+  test("returns a quote object with quote and author properties", () => {
+    const q = getRandomQuote("youtube.com");
+    expect(q).toHaveProperty("quote");
+    expect(q).toHaveProperty("author");
+    expect(typeof q.quote).toBe("string");
+  });
+});
+

@@ -1,0 +1,130 @@
+:root {
+  --ink: #14161c;
+  --surface: #1d2029;
+  --border: #2a2e3a;
+  --gold: #e8b45a;
+  --text: #eceef2;
+  --text-dim: #8b90a0;
+  --accent: #6f8ae0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--ink);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  text-align: center;
+  max-width: 460px;
+  width: 90%;
+  padding: 40px 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.mark {
+  font-size: 52px;
+  color: var(--gold);
+  margin-bottom: 12px;
+  animation: pulse 3s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+p {
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+.site-name {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.quote-box {
+  background: rgba(232, 180, 90, 0.08);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.quote-text {
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.quote-author {
+  font-size: 11px;
+  color: var(--gold);
+  font-weight: 600;
+  text-align: right;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+#snooze-note {
+  font-size: 12px;
+  margin-top: 16px;
+  color: var(--text-dim);
+}

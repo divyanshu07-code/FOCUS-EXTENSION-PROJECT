@@ -58,6 +58,7 @@ const editOriginalField = document.getElementById("edit-domain-original");
 const strictModeCheckbox = document.getElementById("strict-mode");
 const excludePatternsField = document.getElementById("exclude-patterns");
 const includePatternsField = document.getElementById("include-patterns");
+const searchInput = document.getElementById("search-sites");
 
 function patternsFromTextarea(el) {
   return el.value
@@ -215,9 +216,14 @@ async function renderSiteList() {
   const { sites = {}, usage = {} } = await chrome.storage.local.get(["sites", "usage"]);
   const listEl = document.getElementById("site-list");
   const emptyEl = document.getElementById("empty-state");
-  const domains = Object.keys(sites).sort();
+  const filterQuery = (searchInput ? searchInput.value : "").trim().toLowerCase();
 
-  emptyEl.classList.toggle("hidden", domains.length !== 0);
+  let domains = Object.keys(sites).sort();
+  if (filterQuery) {
+    domains = domains.filter((d) => d.toLowerCase().includes(filterQuery));
+  }
+
+  emptyEl.classList.toggle("hidden", Object.keys(sites).length !== 0);
   listEl.innerHTML = "";
 
   domains.forEach((domain) => {
@@ -266,6 +272,10 @@ async function renderSiteList() {
   listEl.querySelectorAll(".icon-action").forEach((btn) => {
     btn.addEventListener("click", () => handleAction(btn.dataset.action, btn.dataset.domain));
   });
+}
+
+if (searchInput) {
+  searchInput.addEventListener("input", () => renderSiteList());
 }
 
 async function handleAction(action, domain) {
@@ -326,7 +336,7 @@ importInput.addEventListener("change", async () => {
   const file = importInput.files[0];
   if (!file) return;
 
-  const MAX_IMPORT_SITES = 500; // sane upper bound; guards against a maliciously huge file
+  const MAX_IMPORT_SITES = 500;
 
   try {
     const text = await file.text();
@@ -343,17 +353,11 @@ importInput.addEventListener("change", async () => {
 
     for (const [rawDomain, entry] of rawEntries) {
       const domain = cleanDomain(rawDomain);
-      // Reject anything that isn't a real-looking domain, and explicitly
-      // reject keys like "__proto__"/"constructor"/"prototype" that could
-      // otherwise tamper with the object's prototype chain when assigned
-      // via bracket notation. isValidDomain already excludes these shapes,
-      // but the explicit check documents the intent and guards against any
-      // future change to the domain-shape regex.
       if (!isValidDomain(domain) || isUnsafeKey(domain)) {
         skipped++;
         continue;
       }
-      normalizedIncoming[domain] = normalizeSite(entry); // normalizeSite clamps/sanitizes every field
+      normalizedIncoming[domain] = normalizeSite(entry);
     }
 
     const importedCount = Object.keys(normalizedIncoming).length;

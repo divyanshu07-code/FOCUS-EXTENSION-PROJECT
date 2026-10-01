@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Focus Lock — Settings</title>
-  <link rel="stylesheet" href="options.css" />
+  <link rel="stylesheet" href="../css/options.css" />
 </head>
 <body>
   <div class="wrap">
@@ -11,7 +11,7 @@
       <div class="mark">◐</div>
       <div>
         <h1>Focus Lock</h1>
-        <p class="sub">Manage tracked sites, limits, and schedules</p>
+        <p class="sub">Manage tracked sites, limits, schedules, and strict mode</p>
       </div>
     </header>
 
@@ -96,6 +96,11 @@
           <input type="file" id="import-json-input" accept="application/json" class="visually-hidden" />
         </div>
       </div>
+
+      <div class="filter-row">
+        <input type="search" id="search-sites" placeholder="Search tracked domains..." />
+      </div>
+
       <div id="site-list"></div>
 
       <div id="empty-state" class="empty-state hidden">
@@ -118,7 +123,7 @@
     <footer class="page-footer">Focus Lock — built by Divyanshu</footer>
   </div>
 
-  <script src="lib.js"></script>
-  <script src="options.js"></script>
+  <script src="../js/lib.js"></script>
+  <script src="../js/options.js"></script>
 </body>
 </html>

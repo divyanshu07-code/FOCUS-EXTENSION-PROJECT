@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Time's Up — Focus Lock</title>
+  <link rel="stylesheet" href="../css/blocked.css" />
+</head>
+<body>
+  <div class="card">
+    <div class="mark">◐</div>
+    <h1>You've hit today's limit</h1>
+    <p>
+      Your <span id="limit-min"></span> minute daily budget for
+      <span class="site-name" id="site-name"></span> is used up.
+      It resets automatically at midnight — go do something else with your time.
+    </p>
+
+    <div class="quote-box">
+      <div id="quote-text" class="quote-text"></div>
+      <div id="quote-author" class="quote-author"></div>
+    </div>
+
+    <div class="actions">
+      <button id="back-btn">Go back</button>
+      <button id="snooze-btn">Snooze 5 more minutes</button>
+    </div>
+    <p id="snooze-note"></p>
+  </div>
+
+  <script src="../js/lib.js"></script>
+  <script src="../js/blocked.js"></script>
+</body>
+</html>

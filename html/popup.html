@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Focus Lock</title>
-  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="../css/popup.css" />
 </head>
 <body>
   <header class="bar">
@@ -14,6 +14,14 @@
     </div>
     <button id="settings-btn" class="icon-btn" title="Manage sites">⚙</button>
   </header>
+
+  <div id="pause-banner" class="pause-banner hidden">
+    <div class="pause-text">
+      <span>Focus Lock Paused</span>
+      <small id="pause-timer"></small>
+    </div>
+    <button id="resume-btn" class="btn-sm">Resume</button>
+  </div>
 
   <section id="stats-panel" class="stats-panel hidden" aria-label="Overall stats">
     <div class="stat">
@@ -41,9 +49,12 @@
     <p class="empty-hint">Add a site with a daily time budget to start seeing your stats here.</p>
   </div>
 
-  <button id="open-options" class="manage-btn">Manage tracked sites</button>
+  <footer class="footer-actions">
+    <button id="pause-toggle-btn" class="pause-btn">Pause 30m</button>
+    <button id="open-options" class="manage-btn">Manage tracked sites</button>
+  </footer>
 
-  <script src="lib.js"></script>
-  <script src="popup.js"></script>
+  <script src="../js/lib.js"></script>
+  <script src="../js/popup.js"></script>
 </body>
 </html>

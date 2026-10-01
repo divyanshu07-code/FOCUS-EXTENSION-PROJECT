@@ -7,6 +7,7 @@ const {
   escapeHTML,
   BADGE_DEFS,
   computeStreak,
+  isGlobalPaused,
 } = FocusLockLib;
 
 function dialSVG(fraction, isOver) {
@@ -38,11 +39,6 @@ function sparklineHTML(domain, limitMinutes, usage) {
   return `<div class="sparkline">${bars}</div>`;
 }
 
-// ---------- global stats ----------
-
-// Total minutes the person stayed *under* their daily budget, summed across
-// every tracked day and site. A motivating, easy-to-explain "time saved"
-// number: every day you don't blow your budget banks the unused minutes.
 function computeMinutesSaved(sites, usage) {
   let savedSeconds = 0;
   Object.entries(usage).forEach(([, dayUsage]) => {
@@ -93,8 +89,6 @@ function renderStats(sites, usage) {
   }
 }
 
-// ---------- badges ----------
-
 function renderBadges(earnedBadges, streak) {
   const row = document.getElementById("badge-row");
   row.innerHTML = BADGE_DEFS.map((badge) => {
@@ -112,13 +106,28 @@ function renderBadges(earnedBadges, streak) {
   }).join("");
 }
 
-// ---------- main render ----------
+function renderPauseState(pausedUntil) {
+  const banner = document.getElementById("pause-banner");
+  const pauseTimer = document.getElementById("pause-timer");
+  const pauseBtn = document.getElementById("pause-toggle-btn");
+
+  if (isGlobalPaused(pausedUntil)) {
+    banner.classList.remove("hidden");
+    const remainingMin = Math.ceil((pausedUntil - Date.now()) / (1000 * 60));
+    pauseTimer.textContent = `${remainingMin} minute${remainingMin === 1 ? "" : "s"} remaining`;
+    pauseBtn.textContent = "Resume";
+  } else {
+    banner.classList.add("hidden");
+    pauseBtn.textContent = "Pause 30m";
+  }
+}
 
 async function render() {
-  const { sites = {}, usage = {}, earnedBadges = {} } = await chrome.storage.local.get([
+  const { sites = {}, usage = {}, earnedBadges = {}, pausedUntil = null } = await chrome.storage.local.get([
     "sites",
     "usage",
     "earnedBadges",
+    "pausedUntil",
   ]);
   const normalizedSites = {};
   Object.entries(sites).forEach(([domain, entry]) => {
@@ -133,6 +142,7 @@ async function render() {
     day: "numeric",
   });
 
+  renderPauseState(pausedUntil);
   renderStats(normalizedSites, usage);
 
   const badgeSection = document.getElementById("badge-section");
@@ -180,6 +190,21 @@ async function render() {
 
 document.getElementById("settings-btn").addEventListener("click", () => chrome.runtime.openOptionsPage());
 document.getElementById("open-options").addEventListener("click", () => chrome.runtime.openOptionsPage());
+
+async function togglePause(minutes) {
+  chrome.runtime.sendMessage({ type: "toggle-pause", minutes }, () => render());
+}
+
+document.getElementById("pause-toggle-btn").addEventListener("click", async () => {
+  const { pausedUntil = null } = await chrome.storage.local.get(["pausedUntil"]);
+  if (isGlobalPaused(pausedUntil)) {
+    togglePause(0);
+  } else {
+    togglePause(30);
+  }
+});
+
+document.getElementById("resume-btn").addEventListener("click", () => togglePause(0));
 
 render();
 chrome.storage.onChanged.addListener(render);
