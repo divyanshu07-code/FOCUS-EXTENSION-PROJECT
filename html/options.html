@@ -11,7 +11,7 @@
       <div class="mark">◐</div>
       <div>
         <h1>Focus Lock</h1>
-        <p class="sub">Manage tracked sites, limits, schedules, and strict mode</p>
+        <p class="sub">Manage tracked sites, limits, schedules, and categories</p>
       </div>
     </header>
 
@@ -20,9 +20,22 @@
       <form id="site-form" class="site-form">
         <input type="hidden" id="edit-domain-original" />
 
-        <div class="row">
-          <label for="domain-input">Domain</label>
-          <input id="domain-input" type="text" placeholder="e.g. youtube.com" required />
+        <div class="row two-col">
+          <div>
+            <label for="domain-input">Domain</label>
+            <input id="domain-input" type="text" placeholder="e.g. youtube.com" required />
+          </div>
+          <div>
+            <label for="category-input">Category</label>
+            <select id="category-input">
+              <option value="General">General</option>
+              <option value="Social">Social</option>
+              <option value="Video">Video</option>
+              <option value="News">News</option>
+              <option value="Gaming">Gaming</option>
+              <option value="Shopping">Shopping</option>
+            </select>
+          </div>
         </div>
 
         <div class="row">

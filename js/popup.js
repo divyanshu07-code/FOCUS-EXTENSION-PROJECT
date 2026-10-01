@@ -174,6 +174,7 @@ async function render() {
         <div class="site-info">
           <div class="site-domain">
             ${escapeHTML(domain)}
+            ${site.category ? `<span class="cat-tag">${escapeHTML(site.category)}</span>` : ""}
             ${site.schedule.enabled ? `<span class="sched-tag">${escapeHTML(site.schedule.start)}–${escapeHTML(site.schedule.end)}</span>` : ""}
             ${site.strictMode ? `<span class="strict-tag">strict</span>` : ""}
           </div>

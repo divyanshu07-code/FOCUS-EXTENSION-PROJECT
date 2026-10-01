@@ -13,6 +13,7 @@
 })(typeof self !== "undefined" ? self : this, function () {
   const DEFAULT_SCHEDULE = { enabled: false, start: "09:00", end: "17:00", days: [0, 1, 2, 3, 4, 5, 6] };
   const DEFAULT_PATH_RULES = { includePatterns: [], excludePatterns: [] };
+  const CATEGORIES = ["General", "Social", "Video", "News", "Gaming", "Shopping"];
 
   // ---------- dates ----------
 
@@ -61,7 +62,7 @@
     return list
       .filter((p) => typeof p === "string")
       .map((p) => p.slice(0, MAX_PATTERN_LENGTH))
-      .slice(0, 50); // cap list length too — no legitimate config needs more than this
+      .slice(0, 50);
   }
 
   function sanitizeSchedule(schedule) {
@@ -83,14 +84,17 @@
     if (typeof entry === "number") {
       return {
         limitMinutes: clampInt(entry, 1, MAX_LIMIT_MINUTES, 30),
+        category: "General",
         schedule: { ...DEFAULT_SCHEDULE },
         strictMode: false,
         pathRules: { ...DEFAULT_PATH_RULES },
       };
     }
     const e = entry && typeof entry === "object" ? entry : {};
+    const cat = typeof e.category === "string" && CATEGORIES.includes(e.category) ? e.category : "General";
     return {
       limitMinutes: clampInt(e.limitMinutes, 1, MAX_LIMIT_MINUTES, 30),
+      category: cat,
       schedule: sanitizeSchedule(e.schedule),
       strictMode: !!e.strictMode,
       pathRules: {
@@ -111,8 +115,6 @@
     return h * 60 + m;
   }
 
-  // Is `now` inside this site's configured tracking/blocking window?
-  // If scheduling isn't enabled, the site is always in-window (legacy behavior).
   function isWithinSchedule(site, now = new Date()) {
     const sched = site.schedule;
     if (!sched || !sched.enabled) return true;
@@ -127,7 +129,6 @@
     if (start <= end) {
       return nowMin >= start && nowMin < end;
     }
-    // overnight window, e.g. 22:00 -> 06:00
     return nowMin >= start || nowMin < end;
   }
 
@@ -237,7 +238,7 @@
 
   const FOCUS_QUOTES = [
     { quote: "Focus is a muscle. Every time you turn away from distraction, you build it stronger.", author: "Focus Lock" },
-    { quote: "Action produces motivation, not the other way around. Step away and start create.", author: "Productivity Principles" },
+    { quote: "Action produces motivation, not the other way around. Step away and start creating.", author: "Productivity Principles" },
     { quote: "It’s not that I’m so smart, it’s just that I stay with problems longer.", author: "Albert Einstein" },
     { quote: "Concentrate all your thoughts upon the work in hand. The sun's rays do not burn until brought to a focus.", author: "Alexander Graham Bell" },
     { quote: "You will never reach your destination if you stop and throw stones at every dog that barks.", author: "Winston Churchill" },
@@ -304,6 +305,7 @@
   return {
     DEFAULT_SCHEDULE,
     DEFAULT_PATH_RULES,
+    CATEGORIES,
     MAX_DOMAIN_LENGTH,
     MAX_LIMIT_MINUTES,
     FOCUS_QUOTES,

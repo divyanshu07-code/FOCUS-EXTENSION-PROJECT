@@ -347,7 +347,17 @@ async function cleanupOldData() {
   await updateStreakBadges(prunedUsage, normalizedSites, earnedBadges);
 }
 
-// ---------- message handling ----------
+// ---------- message & command handling ----------
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === "toggle-focus-pause") {
+    const { pausedUntil = null } = await chrome.storage.local.get(["pausedUntil"]);
+    const isPaused = isGlobalPaused(pausedUntil);
+    const newPausedUntil = isPaused ? null : Date.now() + 30 * 60 * 1000;
+    await setState({ pausedUntil: newPausedUntil });
+    await refreshActiveTab();
+  }
+});
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || typeof msg !== "object") return;

@@ -27,7 +27,9 @@ Most site blockers just block a site outright, all day, every day. Focus Lock in
 
 **v2.2 (Current)**
 - **Structured Modular Architecture** — Clean separation of HTML views (`html/`), CSS styles (`css/`), JavaScript modules (`js/`), icons (`icons/`), and test suites (`tests/`)
-- **Global Focus Pause Mode** — Quick 30-minute pause toggle directly from the toolbar popup
+- **Site Categorization** — Tag sites with categories (`Social`, `Video`, `News`, `Gaming`, `Shopping`, `General`)
+- **Global Focus Pause Mode** — Quick 30-minute pause toggle directly from toolbar popup or keyboard shortcut
+- **Extension Keyboard Shortcuts** — Press `Ctrl+Shift+F` (`Cmd+Shift+F` on Mac) to open popup or `Ctrl+Shift+P` (`Cmd+Shift+P`) to toggle 30m Global Pause
 - **Inspirational Focus Quotes** — Curated motivational focus wisdom rendered on blocked screens
 - **Live Search & Filter** — Instant domain search filter on the options management page
 
@@ -35,7 +37,7 @@ Most site blockers just block a site outright, all day, every day. Focus Lock in
 
 ```
 focus-lock/
-├── manifest.json            # Extension config (Manifest V3)
+├── manifest.json            # Extension config (Manifest V3 + Commands)
 ├── package.json             # Jest dev dependencies & npm test scripts
 ├── .gitignore               # Build & node_modules exclusions
 ├── README.md                # Documentation & guide
@@ -50,10 +52,10 @@ focus-lock/
 │   └── blocked.css          # Block page & quote card styles
 ├── js/                      # All JavaScript source logic
 │   ├── lib.js               # Shared pure-function core library
-│   ├── background.js        # Service worker (tracking, alarms, notifications)
+│   ├── background.js        # Service worker (tracking, alarms, commands)
 │   ├── popup.js             # Toolbar popup controller & stats dashboard
 │   ├── options.js           # Settings manager & chart rendering
-│   └── blocked.js           # Blocked screen controller & snooze request handler
+│   └── blocked.js           # Blocked screen controller & quote renderer
 ├── icons/                   # Extension icons (16x16, 48x48, 128x128)
 │   ├── icon16.png
 │   ├── icon48.png
@@ -61,6 +63,13 @@ focus-lock/
 └── tests/                   # Automated unit test suite
     └── lib.test.js          # Jest unit tests for pure logic
 ```
+
+## Extension Keyboard Shortcuts
+
+| Shortcut | Description |
+| :--- | :--- |
+| `Ctrl+Shift+F` (Mac: `Cmd+Shift+F`) | Open Focus Lock toolbar popup |
+| `Ctrl+Shift+P` (Mac: `Cmd+Shift+P`) | Toggle 30-minute Global Focus Pause |
 
 ## Running the Tests
 

@@ -83,6 +83,7 @@ describe("normalizeSite", () => {
   test("preserves a fully specified entry", () => {
     const input = {
       limitMinutes: 20,
+      category: "Social",
       schedule: { enabled: true, start: "08:00", end: "12:00", days: [1, 2, 3] },
       strictMode: true,
       pathRules: { includePatterns: ["/r/all*"], excludePatterns: [] },

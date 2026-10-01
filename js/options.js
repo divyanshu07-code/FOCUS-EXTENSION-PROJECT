@@ -10,6 +10,7 @@ const {
   normalizeSite,
   formatMinSec,
   escapeHTML,
+  CATEGORIES,
 } = FocusLockLib;
 
 const DAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -53,6 +54,7 @@ const formTitle = document.getElementById("form-title");
 const submitBtn = document.getElementById("submit-btn");
 const cancelEditBtn = document.getElementById("cancel-edit");
 const domainInput = document.getElementById("domain-input");
+const categoryInput = document.getElementById("category-input");
 const minutesInput = document.getElementById("minutes-input");
 const editOriginalField = document.getElementById("edit-domain-original");
 const strictModeCheckbox = document.getElementById("strict-mode");
@@ -74,6 +76,7 @@ function resetForm() {
   submitBtn.textContent = "Add site";
   cancelEditBtn.classList.add("hidden");
   domainInput.disabled = false;
+  categoryInput.value = "General";
   scheduleFields.classList.add("hidden");
   selectedDays = new Set([0, 1, 2, 3, 4, 5, 6]);
   renderDayToggles();
@@ -87,6 +90,7 @@ function startEdit(domain, site) {
   editOriginalField.value = domain;
   domainInput.value = domain;
   domainInput.disabled = true;
+  categoryInput.value = site.category || "General";
   minutesInput.value = site.limitMinutes;
   scheduleCheckbox.checked = !!site.schedule.enabled;
   scheduleFields.classList.toggle("hidden", !site.schedule.enabled);
@@ -127,6 +131,7 @@ form.addEventListener("submit", async (e) => {
   const originalDomain = editOriginalField.value;
   const domain = cleanDomain(domainInput.value);
   const minutes = clampInt(minutesInput.value, 1, MAX_LIMIT_MINUTES, NaN);
+  const category = categoryInput ? categoryInput.value : "General";
 
   if (!domain || !isValidDomain(domain)) {
     showFormError("Enter a valid domain, e.g. youtube.com or reddit.com.");
@@ -143,6 +148,7 @@ form.addEventListener("submit", async (e) => {
 
   sites[domain] = {
     limitMinutes: minutes,
+    category,
     schedule: {
       enabled: scheduleCheckbox.checked,
       start: document.getElementById("start-time").value || "09:00",
@@ -241,6 +247,7 @@ async function renderSiteList() {
           <div class="site-name">${escapeHTML(domain)}</div>
           <div class="site-sub">${escapeHTML(formatMinSec(usedToday))} used today / ${site.limitMinutes}m limit</div>
           <div class="tag-row">
+            ${site.category ? `<span class="cat-pill">${escapeHTML(site.category)}</span>` : ""}
             ${
               site.schedule.enabled
                 ? `<span class="sched-pill">${escapeHTML(site.schedule.start)}\u2013${escapeHTML(site.schedule.end)} \u00b7 ${site.schedule.days
